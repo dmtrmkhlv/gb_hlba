@@ -1,20 +1,25 @@
-FROM node:14 as build-stage
-MAINTAINER GeekBrains <support@geekbrains.ru>
+FROM node:18 as build-stage
 
-USER root
+# WORKDIR /app
+
 ENV APPLICATION_NAME=gb-app
 ENV SASS_BINARY_PATH=/opt/$APPLICATION_NAME/bin/vendor/linux-x64/binding.node
+WORKDIR /opt/$APPLICATION_NAME
 
 
-COPY package.json package-lock.json ./
+COPY package.json .
+COPY package-lock.json .
+
 RUN npm ci
 
-COPY ./ ./
-RUN npm run test
+COPY . .
+
+# ENV FASTIFY_ADDRESS 0.0.0.0
+
 RUN npm run build
 RUN npm prune --production
 
-FROM node:12-alpine as production-stage
+FROM node:18-alpine as production-stage
 
 ENV APPLICATION_NAME=gb-app
 ENV NODE_ENV=production
