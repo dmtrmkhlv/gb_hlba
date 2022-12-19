@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, Post } from '@nestjs/common';
+import { Body, Controller, Get, Header, Param, Post } from '@nestjs/common';
 
 import { IsNotEmpty } from 'class-validator';
 
@@ -66,6 +66,12 @@ export class NewsController {
         // resolve(news);
       }, 100);
     });
+  }
+
+  @Get('test-redis/:searchtext')
+  async testRedis(@Param('searchtext') searchtext: string) {
+    redis.set('foo', searchtext);
+    return await redis.get('foo');
   }
 
   @Post()
