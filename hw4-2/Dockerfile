@@ -16,7 +16,8 @@ COPY . .
 
 # ENV FASTIFY_ADDRESS 0.0.0.0
 
-RUN npm run build
+# RUN npm run build
+RUN npm run start
 RUN npm prune --production
 
 FROM node:18-alpine as production-stage

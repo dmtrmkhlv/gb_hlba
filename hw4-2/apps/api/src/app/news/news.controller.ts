@@ -18,11 +18,14 @@ export class NewsController {
   @Get()
   async getNews() {
     return new Promise((resolve) => {
+      const authorArr = ['Иванов', 'Петров', 'Сидоров', 'Тютчев', 'Пушкин', 'Куприн', 'Давлатов', 'Фрейд', 'Гоголь', 'Зодчев', 'Самарский', 'Карпов', 'Самсонов', 'Лютиков', 'Пришвин', 'Агапов', 'Лосев', 'Ильин', 'Афанасьев', 'Акимов', 'Антонов', 'Вавилова', 'Зайцев', 'Исаев', 'Колесников', 'Котов', 'Мельников', 'Макаров', 'Морозов', 'Суворов', 'Титов', 'Трофимов', 'Фомина', 'Цветкова', 'Шилов', 'Юдин'];
+
       const news = Object.keys([...Array(20)])
         .map((key) => Number(key) + 1)
         .map((n) => ({
           id: n,
           title: `Важная новость ${n}`,
+          author: authorArr[Math.floor(Math.random() * authorArr.length)],
           description: ((rand) =>
             [...Array(rand(1000))]
               .map(() =>
@@ -41,6 +44,7 @@ export class NewsController {
           JSON.stringify({
             id: item['id'],
             title: `Важная новость ${item['id']}`,
+            author: authorArr[Math.floor(Math.random() * authorArr.length)],
             description: ((rand) =>
               [...Array(rand(1000))]
                 .map(() =>
@@ -56,8 +60,11 @@ export class NewsController {
 
       setTimeout(() => {
         redis.hgetall('news', function (err, obj) {
-          console.dir(obj);
-          return resolve(obj);
+          const newObj = [];
+          for (const key in obj) {
+            newObj.push(JSON.parse(obj[key]))
+          }
+          return resolve(newObj);
         });
         // resolve(news);
       }, 100);
@@ -69,6 +76,36 @@ export class NewsController {
     redis.set('foo', searchtext);
     return await redis.get('foo');
   }
+
+  @Get('top-ten')
+  async topTen() {
+    return new Promise((resolve) => {
+      redis.hgetall('news', function (err, obj) {
+        const newObj = [];
+        const authorCount = [];
+        for (const key in obj) {          
+          newObj.push(JSON.parse(obj[key]))
+          authorCount.push(JSON.parse(obj[key]).author)
+        }
+
+        const authorRate = {};       
+
+        authorCount.forEach((item) => {
+            if(authorRate[item]){
+              authorRate[item] += 1;
+            }
+            else{
+              authorRate[item] = 1
+            }
+        });
+
+        let sortable = Object.keys(authorRate);
+
+        sortable.sort(function(a, b) { return authorRate[b] - authorRate[a] });
+                return resolve(`топ-10 авторов: ${sortable.slice(0,10).join(', ')}`);
+              });
+            })
+    }
 
   @Post()
   @Header('Cache-Control', 'none')
