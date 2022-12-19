@@ -52,15 +52,11 @@ export class NewsController {
             createdAt: Date.now(),
           })
         );
-        // redis.hset(`news:${item['id']}`, "id", item['id']);
-        // redis.hset(`news:${item['id']}`, "title", `Важная новость ${n}`)
-        // redis.hset(`news:${item['id']}`, "description", (rand => ([...Array(rand(1000))].map(() => rand(10**16).toString(36).substring(rand(10))).join(' ')))(max => Math.ceil(Math.random() * max)))
-        // redis.hset(`news:${item['id']}`, "createdAt", Date.now())
       });
 
       setTimeout(() => {
         redis.hgetall('news', function (err, obj) {
-          // console.dir(obj);
+          console.dir(obj);
           return resolve(obj);
         });
         // resolve(news);
